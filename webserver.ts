@@ -1,17 +1,17 @@
-import { Application, Router, send } from "https://deno.land/x/oak/mod.ts";
+import { serve } from 'https://deno.land/std/http/server.ts'
+import { Hono } from 'https://deno.land/x/hono/mod.ts'
+import { RedisConnection } from "https://deno.land/x/redis@v0.28.0/connection.ts";
+import { RedisConnectionOptions } from "https://deno.land/x/redis@v0.28.0/connection.ts";
 
-const app = new Application();
-const router = new Router();
-
-router.get("/api/users", async (ctx) => {
-  ctx.response.headers.set("Content-Type", "application/json");
-  ctx.response.headers.set("Cache-Control", "max-age=300");
-  const Data= await fetch('https://dummyjson.com/products')
-  const res= await Data.json()
-  ctx.response.body = {res};
+let redis = new RedisConnection({hostname:"redis://containers-us-west-68.railway.app",port:8040,RedisConnectionOptions({username="default",password="O9GvloCKjwfTR74NoCfM"})})
+const app = new Hono()
+app.get("/api/:url", async (c) => {
+  const uri= c.req.param("url")
+  await redis.set(uri, 'http://google.com', {
+    EX: 10
+  });
+  const ret= await redis.get(uri)
+  return c.text(ret);
 });
 
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-await app.listen({ port: 8000 });
+serve(app.fetch)
