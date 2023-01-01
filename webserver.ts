@@ -12,8 +12,7 @@ import { parseURL } from "https://deno.land/x/redis@v0.28.0/redis.ts";
     }
     return result.toString();
 }
-const regex = /([a-zA-Z,:,\/\/,0-9]*\.[a-zA-Z]*)/gm;
-const regex1= /[a-zA-Z0-9]/gm;
+const regex = /https?:\/\/(?:www\.)*?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gm;
 const redis =  await connect(parseURL("redis://default:O9GvloCKjwfTR74NoCfM@containers-us-west-68.railway.app:8040"))
 const app = new Hono()
 app.get("/api", async (c) => {
@@ -24,7 +23,11 @@ app.get("/api", async (c) => {
 const checker= await redis.exists(id)
     if (checker==1){
       const qury=await redis.get(id)
-      return c.redirect(`${qury || "https://"+qury}`, 301)
+      if (qury.startsWith("https://")){
+        return c.redirect(qury, 301)
+      }else{
+        return c.redirect("https://"+qury.toString(),301)
+      }
     }
     else{
       while ((m = regex.exec(uri)) !== null) {
