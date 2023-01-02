@@ -12,8 +12,9 @@ import { parseURL } from "https://deno.land/x/redis@v0.28.0/redis.ts";
     }
     return result.toString();
 }
+const url=Deno.env.get("URL")
 const regex = /https?:\/\/(?:www\.)*?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gm;
-const redis =  await connect(parseURL("redis://default:O9GvloCKjwfTR74NoCfM@containers-us-west-68.railway.app:8040"))
+const redis =  await connect(parseURL(url))
 const app = new Hono()
 app.get("/api", async (c) => {
   const val=makeid(5)
