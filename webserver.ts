@@ -36,7 +36,7 @@ const checker= await redis.exists(id)
             regex.lastIndex++;
         }
       await redis.setex(val,20,m[0])
-      return c.json({url:`${"http://localhost:8000/api?id="+val}`});
+      return c.json({url:`${"https://localhost/api?id="+val}`});
     }
     }
 });
