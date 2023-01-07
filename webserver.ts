@@ -14,31 +14,43 @@ import { parseURL } from "https://deno.land/x/redis@v0.28.0/redis.ts";
 }
 const url=Deno.env.get("URL")
 const regex = /https?:\/\/(?:www\.)*?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gm;
+const regex2 = /...../gm;
+
 const redis =  await connect(parseURL(url))
 const app = new Hono()
 app.get("/api", async (c) => {
   const val=makeid(5)
   const uri= c.req.queries("url")
-  const id=c.req.queries("id")
   let m;
-const checker= await redis.exists(id)
-    if (checker==1){
-      const qury=await redis.get(id)
-      if (qury.startsWith("https://")){
-        return c.redirect(qury, 301)
-      }else{
-        return c.redirect("https://"+qury.toString(),301)
-      }
-    }
-    else{
       while ((m = regex.exec(uri)) !== null) {
         if (m.index === regex.lastIndex) {
             regex.lastIndex++;
         }
       await redis.setex(val,20,m[0])
-      return c.json({url:`${"https://apikrz.deno.dev/api?id="+val}`});
+      return c.json({url:`${Deno.env.get("localHost")}+${val}`});
     }
+    
+},
+app.get("/:slug",async(c)=>{
+  const id=c.req.param("slug")
+  let S;
+  while ((S = regex.exec(id)) !== null) {
+    if (S.index === regex.lastIndex) {
+        regex.lastIndex++;
     }
-});
+  const checker= await redis.exists(S[0])
+  if (checker==1){
+    const qury=await redis.get(S[0])
+    if (qury.startsWith("https://")){
+    return c.redirect(qury, 301)
+  }else{
+    return c.redirect("https://"+qury.toString(),301)
+  }
+  }else{
+    return c.text("Not Found",404)
+  }
+}
+})
+);
 
 serve(app.fetch)
