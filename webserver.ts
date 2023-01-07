@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std/http/server.ts'
 import { Hono } from 'https://deno.land/x/hono/mod.ts'
 import { connect } from "https://deno.land/x/redis@v0.28.0/redis.ts";
 import { parseURL } from "https://deno.land/x/redis@v0.28.0/redis.ts";
+import { cors } from 'https://deno.land/x/hono/middleware.ts'
 
   function makeid(length:number):string {
     var result           = '';
@@ -18,7 +19,17 @@ const regex2 = /...../gm;
 
 const redis =  await connect(parseURL(url))
 const app = new Hono()
-app.get("/api", async (c) => {
+app.use(
+  '/api',
+  cors({
+    origin: "*",
+    allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
+    exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+    maxAge: 600
+  })
+)
+app.all("/api", async (c) => {
   const val=makeid(5)
   const uri= c.req.queries("url")
   let m;
@@ -26,7 +37,7 @@ app.get("/api", async (c) => {
     if (m.index === regex.lastIndex) {
         regex.lastIndex++;
     }
-  await redis.setex(val,200,m[0])
+  await redis.setex(val,150,m[0])
   return c.json({url:`${Deno.env.get("HOST")+val}`});
 }
 })
@@ -38,7 +49,6 @@ app.get("/:id",async(c)=>{
         regex.lastIndex++;
     }
   const checker= await redis.exists(S[0])
-  console.log(S[0])
   if (checker==1){
     const qury=await redis.get(S[0])
     if (qury.startsWith("https://")){
