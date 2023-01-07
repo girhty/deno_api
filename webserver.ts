@@ -22,23 +22,23 @@ app.get("/api", async (c) => {
   const val=makeid(5)
   const uri= c.req.queries("url")
   let m;
-      while ((m = regex.exec(uri)) !== null) {
-        if (m.index === regex.lastIndex) {
-            regex.lastIndex++;
-        }
-      await redis.setex(val,20,m[0])
-      return c.json({url:`${Deno.env.get("localHost")}+${val}`});
+  while ((m = regex.exec(uri)) !== null) {
+    if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
     }
-    
-},
-app.get("/:slug",async(c)=>{
-  const id=c.req.param("slug")
+  await redis.setex(val,200,m[0])
+  return c.json({url:`${Deno.env.get("HOST")+val}`});
+}
+})
+app.get("/:id",async(c)=>{
+  const id=c.req.param("id")
   let S;
-  while ((S = regex.exec(id)) !== null) {
+  while ((S = regex2.exec(id)) !== null) {
     if (S.index === regex.lastIndex) {
         regex.lastIndex++;
     }
   const checker= await redis.exists(S[0])
+  console.log(S[0])
   if (checker==1){
     const qury=await redis.get(S[0])
     if (qury.startsWith("https://")){
@@ -47,10 +47,10 @@ app.get("/:slug",async(c)=>{
     return c.redirect("https://"+qury.toString(),301)
   }
   }else{
-    return c.text("Not Found",404)
+    return c.text("Not Found")
   }
 }
 })
-);
+;
 
 serve(app.fetch)
