@@ -14,7 +14,7 @@ import { cors } from 'https://deno.land/x/hono/middleware.ts'
     return result.toString();
 }
 const url=Deno.env.get("URL")
-const regex = /https?:\/\/(?:www\.).*/gm;
+const regex = /https?:\/\/.*/gm;
 const regex2 = /(.....)/gm;
 
 const redis =  await connect(parseURL(url))
