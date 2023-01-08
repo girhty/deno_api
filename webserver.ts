@@ -14,8 +14,8 @@ import { cors } from 'https://deno.land/x/hono/middleware.ts'
     return result.toString();
 }
 const url=Deno.env.get("URL")
-const regex = /https?:\/\/(?:www\.)*?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gm;
-const regex2 = /...../gm;
+const regex = /https?:\/\/(?:www\.).*/gm;
+const regex2 = /(.....)/gm;
 
 const redis =  await connect(parseURL(url))
 const app = new Hono()
