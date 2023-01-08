@@ -33,13 +33,17 @@ app.all("/api", async (c) => {
   const val=makeid(5)
   const uri= c.req.queries("url")
   let m;
+  console.log("dm")
   while ((m = regex.exec(uri)) !== null) {
     if (m.index === regex.lastIndex) {
         regex.lastIndex++;
     }
+  console.log(m)
   await redis.setex(val,150,m[0])
   return c.json({url:`${Deno.env.get("HOST")+val}`});
+  
   }
+  return c.text("Not valid",404)
 })
 app.get("/:id",async(c)=>{
   const id=c.req.param("id")
