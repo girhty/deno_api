@@ -39,7 +39,7 @@ app.all("/api", async (c) => {
     }
   await redis.setex(val,150,m[0])
   return c.json({url:`${Deno.env.get("HOST")+val}`});
-}
+  }
 })
 app.get("/:id",async(c)=>{
   const id=c.req.param("id")
