@@ -14,9 +14,7 @@ import { cors } from 'https://deno.land/x/hono/middleware.ts'
     return result.toString();
 }
 const url=Deno.env.get("URL")
-const regex = /https?:\/\/.*/gm;
 const regex2 = /(.....)/gm;
-
 const redis =  await connect(parseURL(url))
 const app = new Hono()
 app.use(
@@ -32,25 +30,16 @@ app.use(
 app.all("/api", async (c) => {
   const val=makeid(5)
   const uri= c.req.queries("url")
-  let m;
-  console.log("dm")
-  while ((m = regex.exec(uri)) !== null) {
-    if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-    }
-  console.log(m)
-  await redis.setex(val,150,m[0])
+  await redis.setex(val,150,uri.toString())
   return c.json({url:`${Deno.env.get("HOST")+val}`});
-  
   }
-  return c.text("Not valid",404)
-})
+)
 app.get("/:id",async(c)=>{
   const id=c.req.param("id")
   let S;
   while ((S = regex2.exec(id)) !== null) {
-    if (S.index === regex.lastIndex) {
-        regex.lastIndex++;
+    if (S.index === regex2.lastIndex) {
+        regex2.lastIndex++;
     }
   const checker= await redis.exists(S[0])
   if (checker==1){
