@@ -45,7 +45,8 @@ app.all("/api", async (c) => {
 app.get("/:query",async(c)=>{
   const query=c.req.param("query")
   const id = search(query)
-  const qury=await redis.get(id['0'])
+  console.log(id)
+  const qury=await redis.get(id["0"])
   if (qury){
     return c.redirect(qury, 301)
   }
