@@ -13,12 +13,12 @@ import { cors } from 'https://deno.land/x/hono/middleware.ts'
     }
     return result.toString();
 }
-function search(input){
-  const regex = /(......)/gm;
-  let m;
+function search(input:string){
+  const regex = /^([a-zA-z-0-9]*)/gm;
+  let m:RegExpExecArray | null ;
   while ((m = regex.exec(input.toString())) !== null) {
     if (m.index === regex.lastIndex) {regex.lastIndex++;}
-    return m
+    return m;
   }
 }
 const url=Deno.env.get("URL")
@@ -35,7 +35,7 @@ app.use(
   })
 )
 app.all("/api", async (c) => {
-  const val:string=makeid(5)
+  const val:string=makeid(6)
   const uri:string= c.req.queries("url")
   const duration:number=c.req.queries("dur")
   await redis.setex(val,duration,uri)
@@ -43,14 +43,14 @@ app.all("/api", async (c) => {
   }
 )
 app.get("/:id",async(c)=>{
-  const id:string=c.req.param("id")
+  const id=c.req.param("id")
   const mod = search(id)
-  console.log(mod)
   const qury=await redis.get(mod["0"])
   if (qury){
     return c.redirect(qury, 301)
-  }
-  return c.text("Not Found")
+  }else{
+    return c.text("Not Valid")
+    }
 })
 ;
 
