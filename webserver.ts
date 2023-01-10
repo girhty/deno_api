@@ -27,7 +27,7 @@ const app = new Hono()
 app.use(
   '/api',
   cors({
-    origin: "https://smrf.netlify.app",
+    origin: "*",
     allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
     allowMethods: ['POST', 'GET', 'OPTIONS'],
     exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
