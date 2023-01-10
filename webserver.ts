@@ -13,6 +13,14 @@ import { cors } from 'https://deno.land/x/hono/middleware.ts'
     }
     return result.toString();
 }
+function search(input){
+  const regex = /(......)/gm;
+  let m;
+  while ((m = regex.exec(input.toString())) !== null) {
+    if (m.index === regex.lastIndex) {regex.lastIndex++;}
+    return m
+  }
+}
 const url=Deno.env.get("URL")
 const redis =  await connect(parseURL(url))
 const app = new Hono()
@@ -27,26 +35,21 @@ app.use(
   })
 )
 app.all("/api", async (c) => {
-  const val=makeid(5)
-  const uri= c.req.queries("url")
-  await redis.setex(val,150,uri.toString())
+  const val:string=makeid(5)
+  const uri:string= c.req.queries("url")
+  const duration:number=c.req.queries("dur")
+  await redis.setex(val,duration,uri)
   return c.json({url:`${Deno.env.get("HOST")+val}`});
   }
 )
-app.get("/:id",async(c)=>{
-  const id=c.req.param("id")
-
-  const checker= await redis.exists(id)
-  if (checker==1){
-    const qury=await redis.get(id)
-    if (qury.startsWith("https://")){
+app.get("/:query",async(c)=>{
+  const query=c.req.param("query")
+  const id = search(query)
+  const qury=await redis.get(id['0'])
+  if (qury){
     return c.redirect(qury, 301)
-  }else{
-    return c.redirect("https://"+qury.toString(),301)
   }
-  }else{
-    return c.text("Not Found")
-  }
+  return c.text("Not Found")
 })
 ;
 
