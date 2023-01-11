@@ -36,16 +36,11 @@ app.use(
 )
 
 app.all("/api", async (c) => {
-  const data = localStorage
   const val:string=makeid(6)
   const uri:string= c.req.queries("url")
   const duration:number=c.req.queries("dur")
-  if (data[uri]){
-    return c.json({url:data[uri]})
-  }else{
-    await redis.setex(val,duration,uri)
-    return c.json({url:`${Deno.env.get("HOST")+val}`});
-  }
+  await redis.setex(val,duration,uri)
+  return c.json({url:`${Deno.env.get("HOST")+val}`});
   
   }
 )
@@ -60,7 +55,7 @@ function findKeyByValue(obj, value:string):string {
 app.get("/:id",async(c)=>{
   const id=c.req.param("id")
   const mod = search(id)
-  const data:Storage=localStorage
+  let data=localStorage
   const red=findKeyByValue(data,`https://smrf.deno.dev/${id}`)
   if (red!=="Not Found"){
     return c.redirect(red,301)
