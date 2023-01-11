@@ -61,7 +61,7 @@ app.get("/:id",async(c)=>{
   const id=c.req.param("id")
   const mod = search(id)
   const data:Storage=localStorage
-  const red=findKeyByValue(data,id)
+  const red=findKeyByValue(data,`https://smrf.deno.dev/${id}`)
   if (red!=="Not Found"){
     return c.redirect(red,301)
   }
