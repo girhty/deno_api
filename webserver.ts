@@ -45,8 +45,9 @@ app.all("/api", async (c) => {
   if (uri === undefined){
     return c.json({url:"required"})
   }
-  if (await redis.get(uri)!==0){
-    return c.json({url:`${redis.get(uri)}`});
+  const check:string=await redis.get(uri)
+  if (check!=="0"){
+    return c.json({url:`${check}`});
   }else{
     await redis.setex(val,duration,uri)
     return c.json({url:`${Deno.env.get("HOST")+val}`});
