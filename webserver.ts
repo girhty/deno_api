@@ -39,7 +39,7 @@ app.all("/api", async (c) => {
   const val:string=makeid(6)
   const uri:string= c.req.queries("url")
   const duration:number=c.req.queries("dur")
-  const check= await redis.get(uri)
+  const check:string= await redis.get(uri)
   if (check){
     return c.json({url:check});
   }else{
