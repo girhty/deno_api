@@ -39,13 +39,13 @@ app.all("/api", async (c) => {
   const val:string=makeid(6)
   const uri:string= c.req.queries("url")
   const duration:number=c.req.queries("dur")
-  if (!duration){
+  if (duration=== undefined){
     return c.json({duration:"required"})
   }
-  if (!uri){
+  if (uri === undefined){
     return c.json({url:"required"})
   }
-  if (await redis.get(uri)){
+  if (await redis.get(uri)!==0){
     return c.json({url:`${redis.get(uri)}`});
   }else{
     await redis.setex(val,duration,uri)
