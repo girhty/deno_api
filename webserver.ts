@@ -34,17 +34,27 @@ app.use(
     maxAge: 600
   })
 )
+
 app.all("/api", async (c) => {
+  const data = localStorage
   const val:string=makeid(6)
   const uri:string= c.req.queries("url")
   const duration:number=c.req.queries("dur")
-  await redis.setex(val,duration,uri)
-  return c.json({url:`${Deno.env.get("HOST")+val}`});
+  if (data[uri]){
+    return c.json({url:data[uri]})
+  }else{
+    await redis.setex(val,duration,uri)
+    return c.json({url:`${Deno.env.get("HOST")+val}`});
+  }
+  
   }
 )
 app.get("/:id",async(c)=>{
   const id=c.req.param("id")
   const mod = search(id)
+  const data:Storage=localStorage
+  const findKeyByValue = (data, id) => Object.entries(data).find(([key, val]) => val === id)[0];
+  console.log(findKeyByValue)
   const qury=await redis.get(mod["0"])
   if (qury){
     return c.redirect(qury, 301)
