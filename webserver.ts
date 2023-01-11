@@ -39,13 +39,18 @@ app.all("/api", async (c) => {
   const val:string=makeid(6)
   const uri:string= c.req.queries("url")
   const duration:number=c.req.queries("dur")
-  const check:string= await redis.get(uri)
-  if (check){
-    return c.json({url:check});
+  if (!duration){
+    return c.json({duration:"required"})
+  }
+  if (!uri){
+    return c.json({url:"required"})
+  }
+  if (await redis.get(uri)){
+    return c.json({url:`${redis.get(uri)}`});
   }else{
     await redis.setex(val,duration,uri)
     return c.json({url:`${Deno.env.get("HOST")+val}`});
-  }  
+  }
   }
 )
 
