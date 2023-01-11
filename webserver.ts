@@ -27,7 +27,7 @@ const app = new Hono()
 app.use(
   '/api',
   cors({
-    origin: "*",
+    origin: "https://smrf.netlify.app",
     allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
     allowMethods: ['POST', 'GET', 'OPTIONS'],
     exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
@@ -39,9 +39,13 @@ app.all("/api", async (c) => {
   const val:string=makeid(6)
   const uri:string= c.req.queries("url")
   const duration:number=c.req.queries("dur")
-  await redis.setex(val,duration,uri)
-  return c.json({url:`${Deno.env.get("HOST")+val}`});
-  
+  const check= await redis.get(uri)
+  if (check){
+    return c.json({url:check});
+  }else{
+    await redis.setex(val,duration,uri)
+    return c.json({url:`${Deno.env.get("HOST")+val}`});
+  }  
   }
 )
 
