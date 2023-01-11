@@ -49,12 +49,22 @@ app.all("/api", async (c) => {
   
   }
 )
+function findKeyByValue(obj, value:string):string {
+  for (const key in obj) {
+    if (obj[key] === value) {
+      return key;
+    }
+  }
+  return "Not Found";
+}
 app.get("/:id",async(c)=>{
   const id=c.req.param("id")
   const mod = search(id)
   const data:Storage=localStorage
-  const findKeyByValue = (data, id) => Object.entries(data).find(([key, val]) => val === id)[0];
-  console.log(findKeyByValue)
+  const red=findKeyByValue(data,id)
+  if (red!=="Not Found"){
+    return c.redirect(red,301)
+  }
   const qury=await redis.get(mod["0"])
   if (qury){
     return c.redirect(qury, 301)
