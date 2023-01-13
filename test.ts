@@ -9,5 +9,5 @@ function searchURL(input: string) {
         return m;
   }}
 
-  const url:string[]=searchURL("https://railway.app/project/9cf7d063-01cf-4917-acc2-ea1c8315f888/plugin/ecfa081b-6956-4508-a24a-606858b8ae53/Data")
-  console.log(btoa(url[2].slice(-(url[2].length))))
+  const url:string[]=searchURL("https://railway.app/project/adw-01cf-4917-acc2-ea1c8315f888/plugin/ecfa081b-6956-4508-a24a-606858b8ae53/Data")
+  console.log(btoa(url[2].split('').reverse().join('')))

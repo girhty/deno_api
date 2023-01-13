@@ -4,10 +4,9 @@ import { connect } from "https://deno.land/x/redis@v0.28.0/redis.ts";
 import { parseURL } from "https://deno.land/x/redis@v0.28.0/redis.ts";
 import { cors } from "https://deno.land/x/hono/middleware.ts";
 
-function makeid(length: number): string {
+function makeid(length: number,chars:string): string {
   var result = "";
-  var characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var characters =chars.replace("==");
   var charactersLength = characters.length;
   for (var i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -68,7 +67,7 @@ app.all("/api", async (c) => {
     const val = {
       id: `${
         group[2]
-          ? btoa(group[2].slice(-(group[2].length))).substring(0, 6)
+          ? makeid(6,btoa(group[2]))
           : btoa(group[1]).substring(0, 6)
       }`,
       site: `${group[2] ? btoa(group[1] + group[2]) : btoa(group[1])}`,
