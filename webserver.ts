@@ -34,23 +34,27 @@ app.use(
     maxAge: 600
   })
 )
-
+function compressURL(str:string){
+  return {start:`${btoa(str).substring(0, 6)}`,
+          end:`${btoa(str).substring(6)}`
+        };
+}
 app.all("/api", async (c) => {
-  const val:string=makeid(6)
-  const uri:string= c.req.queries("url")
-  const duration:number=c.req.queries("dur")
-  if (!duration){
-    return c.json({duration:"required"})
-  }
-  if (!uri){
-    return c.json({url:"required"})
-  }
-  const check:string=await redis.get(uri)
-  if (check){
-    return c.json({url:`${check}`});
+  const uri= c.req.queries("url")
+  const val=compressURL(uri[0].replace("https://",""))
+  const duration=c.req.queries("dur")
+  if (duration.length===0 || uri.length===0){
+    return c.json({queries:{
+      errors:`${duration.length===0 ? "duration requierd ":"uri requierd"}`
+    }},400)
   }else{
-    await redis.setex(val,duration,uri)
-    return c.json({url:`${Deno.env.get("HOST")+val}`});
+    const check:string=await redis.get(val.start)
+  if (check){
+    return c.json({url:`${Deno.env.get("HOST")+val.start}`});
+  }else{
+    await redis.setex(val.start,duration,val.end)
+    return c.json({url:`${Deno.env.get("HOST")+val.start}`});
+  }
   }
   }
 )
@@ -60,7 +64,7 @@ app.get("/:id",async(c)=>{
   const mod = search(id)
   const qury=await redis.get(mod["0"])
   if (qury){
-    return c.redirect(qury, 301)
+    return c.redirect(`https://${atob(mod["0"]+qury)}`, 301)
   }else{
     return c.text("Not Valid")
     }
