@@ -1,78 +1,83 @@
-import { serve } from 'https://deno.land/std/http/server.ts'
-import { Hono } from 'https://deno.land/x/hono/mod.ts'
+import { serve } from "https://deno.land/std/http/server.ts";
+import { Hono } from "https://deno.land/x/hono/mod.ts";
 import { connect } from "https://deno.land/x/redis@v0.28.0/redis.ts";
 import { parseURL } from "https://deno.land/x/redis@v0.28.0/redis.ts";
-import { cors } from 'https://deno.land/x/hono/middleware.ts'
+import { cors } from "https://deno.land/x/hono/middleware.ts";
 
-  function makeid(length:number):string {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result.toString();
+function makeid(length: number): string {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result.toString();
 }
-function search(input:string){
+function search(input: string) {
   const regex = /^([a-zA-z-0-9]*)/gm;
   let m;
   while ((m = regex.exec(input.toString())) !== null) {
-    if (m.index === regex.lastIndex) {regex.lastIndex++;}
+    if (m.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
     return m;
   }
 }
-const url=Deno.env.get("URL")
-const redis =  await connect(parseURL(url))
-const app = new Hono()
+const url = Deno.env.get("URL");
+const redis = await connect(parseURL(url));
+const app = new Hono();
 app.use(
-  '/api',
+  "/api",
   cors({
     origin: "https://smrf.netlify.app",
-    allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
-    allowMethods: ['POST', 'GET', 'OPTIONS'],
-    exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
-    maxAge: 600
+    allowHeaders: ["X-Custom-Header", "Upgrade-Insecure-Requests"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
+    exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
+    maxAge: 600,
   })
-)
-function compressURL(str:string){
-  return {start:`${btoa(str).substring(0, 6)}`,
-          end:`${btoa(str).substring(6)}`
-        };
+);
+function compressURL(str: string) {
+  return {
+    start: `${btoa(str).substring(0, 6)}`,
+    end: `${btoa(str).substring(6)}`,
+  };
 }
 app.all("/api", async (c) => {
-  const uri= c.req.queries("url")
-  const duration=c.req.queries("dur")
-  if (duration.length===0 || uri.length===0){
-    return c.json({queries:{
-      errors:`${duration.length===0 ? "duration requierd ":"uri requierd"}`
-    }},400)
-  }else{
-    const val=compressURL(uri[0].replace("https://",""))
-    const check:string=await redis.get(val.start)
-  if (check){
-    return c.json({url:`${Deno.env.get("HOST")+val.start}`});
-  }else{
-    await redis.setex(val.start,duration,val.end)
-    return c.json({url:`${Deno.env.get("HOST")+val.start}`});
-  }
-  }
-  }
-)
-
-app.get("/:id",async(c)=>{
-  const id=c.req.param("id")
-  const mod = search(id)
-  if (mod["0"].length!==0){
-    const qury=await redis.get(mod["0"])
-    if (qury){
-    return c.redirect(`https://${atob(mod["0"]+qury)}`, 301)
-    }else{
-    return c.text("Not Found")
+  const uri = c.req.queries("url");
+  const duration = c.req.queries("dur");
+  if (duration.length === 0 || uri.length === 0) {
+    return c.json(
+      {
+        queries: {
+          errors: `${
+            duration.length === 0 ? "duration requierd " : "uri requierd"
+          }`,
+        },
+      },
+      400
+    );
+  } else {
+    const val = compressURL(uri[0].replace("https://", ""));
+    const check: string = await redis.get(val.start);
+    if (check) {
+      return c.json({ url: `${Deno.env.get("HOST") + val.start}` });
+    } else {
+      await redis.setex(val.start, duration, val.end);
+      return c.json({ url: `${Deno.env.get("HOST") + val.start}` });
     }
-  } else{
-    return c.text("Not Valid")
   }
-})
-;
+});
 
-serve(app.fetch)
+app.get("/:id", async (c) => {
+  const id = c.req.param("id");
+  const mod = search(id);
+  const qury = await redis.get(mod["0"]);
+  if (qury) {
+    return c.redirect(`https://${atob(mod["0"] + qury)}`, 301);
+  } else {
+    return c.text("Not Found");
+  }
+});
+
+serve(app.fetch);
