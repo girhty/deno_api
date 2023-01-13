@@ -62,12 +62,16 @@ app.all("/api", async (c) => {
 app.get("/:id",async(c)=>{
   const id=c.req.param("id")
   const mod = search(id)
-  const qury=await redis.get(mod["0"])
-  if (qury){
+  if (mod){
+    const qury=await redis.get(mod["0"])
+    if (qury){
     return c.redirect(`https://${atob(mod["0"]+qury)}`, 301)
   }else{
-    return c.text("Not Valid")
+    return c.text("Not Found")
     }
+  } else{
+    return c.text("Not Valid")
+  }
 })
 ;
 
