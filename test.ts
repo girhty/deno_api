@@ -12,5 +12,5 @@ function searchURL(input: string) {
   const url:string[]=searchURL("https://railway.app/project/adw-01cf-4917-acc2-ea1c8315f888/plugin/ecfa081b-6956-4508-a24a-606858b8ae53/Data")
 const id=btoa(url[2])
 console.log(id)
-console.log(id.split("").reverse().join("").replace("=",'').substring(10,16))
+console.log(id.split("").reverse().join("").replace("=",'').substring(Math.floor(id.length/2),Math.floor(id.length/2)+6))
   
