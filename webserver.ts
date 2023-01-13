@@ -14,7 +14,7 @@ function makeid(length: number): string {
   }
   return result.toString();
 }
-function search(input: string) {
+function searchID(input: string) {
   const regex = /^([a-zA-z-0-9]*)/gm;
   let m;
   while ((m = regex.exec(input.toString())) !== null) {
@@ -24,6 +24,16 @@ function search(input: string) {
     return m;
   }
 }
+function searchURL(input: string) {
+  const regex = /https?:\/\/(?:www\.)?([-\d\w.]{2,256}[\d\w]{2,6}\b)*(\/[?\/\d\w\=+&#.-]*)*/gi;
+  let m;
+  while ((m = regex.exec(input)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+          regex.lastIndex++;
+      }
+      return m;
+}}
 const url = Deno.env.get("URL");
 const redis = await connect(parseURL(url));
 const app = new Hono();
@@ -37,10 +47,10 @@ app.use(
     maxAge: 600,
   })
 );
-function compressURL(str: string) {
+function compressURL(group1: string,group2:string) {
   return {
-    start: `${btoa(str).substring(0, 6)}`,
-    end: `${btoa(str).substring(6)}`,
+    id: `${btoa(group2).substring(0, 6)}`,
+    site: `${btoa(group1+group2)}`,
   };
 }
 app.all("/api", async (c) => {
@@ -58,23 +68,24 @@ app.all("/api", async (c) => {
       400
     );
   } else {
-    const val = compressURL(uri[0].replace("https://", ""));
-    const check: string = await redis.get(val.start);
+    const group=searchURL(uri)
+    const val = compressURL(group[1],group[2]);
+    const check: string = await redis.get(val.id);
     if (check) {
-      return c.json({ url: `${Deno.env.get("HOST") + val.start}` });
+      return c.json({ url: `${Deno.env.get("HOST") + val.id}` });
     } else {
-      await redis.setex(val.start, duration, val.end);
-      return c.json({ url: `${Deno.env.get("HOST") + val.start}` });
+      await redis.setex(val.id, duration, val.site);
+      return c.json({ url: `${Deno.env.get("HOST") + val.id}` });
     }
   }
 });
 
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
-  const mod = search(id);
+  const mod = searchID(id);
   const qury = await redis.get(mod["0"]);
   if (qury) {
-    return c.redirect(`https://${atob(mod["0"] + qury)}`, 301);
+    return c.redirect(`https://${atob(qury)}`, 301);
   } else {
     return c.text("Not Found");
   }
