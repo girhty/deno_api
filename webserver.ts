@@ -64,11 +64,11 @@ app.all("/api", async (c) => {
       400
     );
   } else {
-    const group = searchURL(uri);
+    const group:string[] = searchURL(uri);
     const val = {
       id: `${
         group[2]
-          ? btoa(group[2].slice(-3,0)).substring(0, 6)
+          ? btoa(group[2].slice(-3)).substring(0, 6)
           : btoa(group[1]).substring(0, 6)
       }`,
       site: `${group[2] ? btoa(group[1] + group[2]) : btoa(group[1])}`,
