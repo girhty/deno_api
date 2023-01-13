@@ -6,7 +6,7 @@ import { cors } from "https://deno.land/x/hono/middleware.ts";
 
 function makeid(length: number,chars:string): string {
   var result = "";
-  var characters =chars.replace("==");
+  var characters =chars.replace("==","");
   var charactersLength = characters.length;
   for (var i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -67,7 +67,7 @@ app.all("/api", async (c) => {
     const val = {
       id: `${
         group[2]
-          ? makeid(6,btoa(group[2]))
+          ? btoa(group[2]).split("").reverse().join("").replace("=",'').slice(length-7)
           : btoa(group[1]).substring(0, 6)
       }`,
       site: `${group[2] ? btoa(group[1] + group[2]) : btoa(group[1])}`,

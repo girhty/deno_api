@@ -10,4 +10,7 @@ function searchURL(input: string) {
   }}
 
   const url:string[]=searchURL("https://railway.app/project/adw-01cf-4917-acc2-ea1c8315f888/plugin/ecfa081b-6956-4508-a24a-606858b8ae53/Data")
-  console.log(btoa(url[2].split('').reverse().join('')))
+const id=btoa(url[2])
+console.log(id)
+console.log(id.split("").reverse().join("").replace("=",'').slice(id.length-7))
+  
