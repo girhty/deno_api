@@ -12,5 +12,5 @@ function searchURL(input: string) {
   const url:string[]=searchURL("https://redis.io/docs")
 const id=btoa(url[2])
 console.log(id)
-console.log(id.split("").reverse().join("").replace("=",'').substring(Math.floor(id.length/1.25),Math.floor(id.length/1.25)+6))
+console.log(id.split("").reverse().join("").replace("=",'').substring(Math.floor(id.length/2),Math.floor(id.length/2)+6))
   

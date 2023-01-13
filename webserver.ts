@@ -68,7 +68,7 @@ app.all("/api", async (c) => {
     const val = {
       id: `${
         group[2]
-          ? `${group[2].length>15 ? id.substring(Math.floor(id.length/1.25),Math.floor(id.length/1.25)+6): id.substring(0,6)}`
+          ? `${group[2].length>15 ? id.substring(Math.floor(id.length/2),Math.floor(id.length/2)+6): id.substring(0,6)}`
           : btoa(group[1].replace("=",'')).substring(0, 6)
       }`,
       site: `${group[2] ? btoa(group[1] + group[2]) : btoa(group[1])}`,
