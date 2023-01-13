@@ -25,15 +25,16 @@ function searchID(input: string) {
   }
 }
 function searchURL(input: string) {
-  const regex = /https?:\/\/(?:www\.)?([-\d\w.]{2,256}[\d\w]{2,6}\b)*(\/[?\/\d\w\=+&#.-]*)*/gi;
+  const regex =
+    /https?:\/\/(?:www\.)?([-\d\w.]{2,256}[\d\w]{2,6}\b)*(\/[?\/\d\w\=+&#.-]*)*/gi;
   let m;
   while ((m = regex.exec(input)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-          regex.lastIndex++;
-      }
-      return m;
-}}
+    if (m.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
+    return m;
+  }
+}
 const url = Deno.env.get("URL");
 const redis = await connect(parseURL(url));
 const app = new Hono();
@@ -47,12 +48,7 @@ app.use(
     maxAge: 600,
   })
 );
-function compressURL(group1: string,group2:string) {
-  return {
-    id: `${btoa(group2).substring(0, 6)}`,
-    site: `${btoa(group1+group2)}`,
-  };
-}
+
 app.all("/api", async (c) => {
   const uri = c.req.queries("url");
   const duration = c.req.queries("dur");
@@ -68,8 +64,15 @@ app.all("/api", async (c) => {
       400
     );
   } else {
-    const group=searchURL(uri)
-    const val = compressURL(group[1],group[2]);
+    const group = searchURL(uri);
+    const val = {
+      id: `${
+        group[2]
+          ? btoa(group[2].slice(-1)).substring(0, 6)
+          : btoa(group[1].slice(-1)).substring(0, 6)
+      }`,
+      site: `${group[2] ? btoa(group[1] + group[2]) : btoa(group[1])}`,
+    };
     const check: string = await redis.get(val.id);
     if (check) {
       return c.json({ url: `${Deno.env.get("HOST") + val.id}` });
