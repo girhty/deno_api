@@ -41,13 +41,13 @@ function compressURL(str:string){
 }
 app.all("/api", async (c) => {
   const uri= c.req.queries("url")
-  const val=compressURL(uri[0].replace("https://",""))
   const duration=c.req.queries("dur")
   if (duration.length===0 || uri.length===0){
     return c.json({queries:{
       errors:`${duration.length===0 ? "duration requierd ":"uri requierd"}`
     }},400)
   }else{
+    const val=compressURL(uri[0].replace("https://",""))
     const check:string=await redis.get(val.start)
   if (check){
     return c.json({url:`${Deno.env.get("HOST")+val.start}`});
