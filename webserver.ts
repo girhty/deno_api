@@ -15,7 +15,7 @@ import { cors } from 'https://deno.land/x/hono/middleware.ts'
 }
 function search(input:string){
   const regex = /^([a-zA-z-0-9]*)/gm;
-  let m:RegExpExecArray | null ;
+  let m;
   while ((m = regex.exec(input.toString())) !== null) {
     if (m.index === regex.lastIndex) {regex.lastIndex++;}
     return m;
@@ -62,11 +62,11 @@ app.all("/api", async (c) => {
 app.get("/:id",async(c)=>{
   const id=c.req.param("id")
   const mod = search(id)
-  if (mod){
+  if (mod["0"].length!==0){
     const qury=await redis.get(mod["0"])
     if (qury){
     return c.redirect(`https://${atob(mod["0"]+qury)}`, 301)
-  }else{
+    }else{
     return c.text("Not Found")
     }
   } else{
