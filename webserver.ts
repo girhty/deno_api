@@ -64,7 +64,7 @@ app.all("/api", async (c) => {
     );
   } else {
     const group:string[] = searchURL(uri);
-    const id:string|undefined=btoa(group[2]).split("").reverse().join("").replace(/\==/gm,'')
+    const id:string|undefined=btoa(group[2]).split("").reverse().join("").replace(/\=*/gm,'')
     const val = {
       id: `${
         group[2]
