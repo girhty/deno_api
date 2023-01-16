@@ -63,14 +63,14 @@ app.all("/api", async (c) => {
     );
   } else {
     const group:string[] = searchURL(uri);
-    const id:string|undefined=btoa(group[2]).split("").reverse().join("").replace(/\=*/gm,'')
+    const id:string|undefined=btoa(group["2"]).split("").reverse().join("").replace(/\=*/gm,'')
     const val = {
       id: `${
-        group[2]
-          ? `${group[2].length>15 ? id.substring(Math.floor(id.length/2),Math.floor(id.length/2)+6): id.substring(0,6)}`
-          : btoa(group[1].replace("=",'')).substring(0, 6)
+        group["2"]
+          ? `${group["2"].length>15 ? id.substring(Math.floor(id.length/2),Math.floor(id.length/2)+6): id.substring(0,6)}`
+          : btoa(group["1"].replace("=",'')).substring(0, 6)
       }`,
-      site: `${group[2] ? btoa(group[1] + group[2]) : btoa(group[1])}`,
+      site: `${group["2"] ? btoa(group["1"] + group["2"]) : btoa(group["1"])}`,
     };
     const check: string = await redis.get(val.id);
     if (check) {
