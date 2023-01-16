@@ -12,5 +12,5 @@ function searchURL(input: string) {
   const url:string[]=searchURL("https://www.twitch.tv/togglebit")
 const id=btoa(url[2])
 console.log(id)
-console.log(id.split("").reverse().join("").replace(/\==/gm,''))
+console.log(id.split("").reverse().join("").replace(/\=*/gm,''))
   
