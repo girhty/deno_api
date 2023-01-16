@@ -2,18 +2,11 @@ import { Hono } from "https://deno.land/x/hono/mod.ts";
 import { connect } from "https://deno.land/x/redis@v0.28.0/redis.ts";
 import { parseURL } from "https://deno.land/x/redis@v0.28.0/redis.ts";
 import { cors } from "https://deno.land/x/hono/middleware.ts";
+import {serve} from "https://deno.land/std/http/server.ts";
 
-function makeid(length: number,chars:string): string {
-  var result = "";
-  var characters =chars.replace("==","");
-  var charactersLength = characters.length;
-  for (var i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result.toString();
-}
+
 function searchID(input: string) {
-  const regex = /^([a-zA-z-0-9]*)/gm;
+  const regex = /^([a-zA-z-0-9]*)/gi;
   let m;
   while ((m = regex.exec(input.toString())) !== null) {
     if (m.index === regex.lastIndex) {
@@ -63,14 +56,14 @@ app.all("/api", async (c) => {
     );
   } else {
     const group:string[] = searchURL(uri);
-    const id:string|undefined=btoa(group["2"]).split("").reverse().join("").replace(/\=*/gm,'')
+    const idconstractor:string|undefined=btoa(group[2]).split("").reverse().join("").replace(/\=*/gi,'')
     const val = {
       id: `${
-        group["2"]
-          ? `${group["2"].length>15 ? id.substring(Math.floor(id.length/2),Math.floor(id.length/2)+6): id.substring(0,6)}`
-          : btoa(group["1"].replace("=",'')).substring(0, 6)
+        group[2] && group[2]!=="/"
+          ? `${group[2].length>15 ? idconstractor.substring(Math.floor(idconstractor.length/2),Math.floor(idconstractor.length/2)+6): idconstractor.substring(0,6)}`
+          : btoa(group[1].replace(/\=*/gi,'')).substring(0, 6)
       }`,
-      site: `${group["2"] ? btoa(group["1"] + group["2"]) : btoa(group["1"])}`,
+      site: `${group[2] ? btoa(group[1] + group[2]) : btoa(group[1])}`,
     };
     const check: string = await redis.get(val.id);
     if (check) {
@@ -92,3 +85,5 @@ app.get("/:id", async (c) => {
     return c.text("Not Found");
   }
 });
+
+serve(app.fetch);
