@@ -43,11 +43,11 @@ app.use(
 app.all("/api", async (c) => {
   let uri:string = c.req.queries("url")[0];
   let duration:number = c.req.queries("dur")[0];
-  if (!Number(duration) || duration <= 0 || uri.length === 0 || uri.startsWith('"') || !uri.matchAll(/https:\/\/?/gi)) {
+  if (!Number(duration) || duration <= 0 || uri.length === 0 || uri.startsWith('"') || !uri.startsWith("https://")) {
     return c.json(
       {
         queries: {
-          errors: `${uri.startsWith('"') || !uri.matchAll(/https:\/\/?/gi) ? "invalid URL" : 
+          errors: `${uri.startsWith('"') || !uri.startsWith("https://") ? "invalid URL" : 
             duration<=0 || !Number(duration) ? "duration requierd " : "uri requierd"
           }`,
         },
