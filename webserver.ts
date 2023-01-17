@@ -41,20 +41,21 @@ app.use(
 );
 
 app.all("/api", async (c) => {
-  const uri = c.req.queries("url");
-  const duration = c.req.queries("dur");
-  if (duration.length === 0 || uri.length === 0) {
+  let uri:string = c.req.queries("url")[0];
+  let duration:number = c.req.queries("dur")[0];
+  if (!Number(duration) || duration <= 0 || uri.length === 0 || uri.startsWith('"')) {
     return c.json(
       {
         queries: {
-          errors: `${
-            duration.length === 0 ? "duration requierd " : "uri requierd"
+          errors: `${uri.startsWith('"') ? "invalid URL" : 
+            duration<=0 || !Number(duration) ? "duration requierd " : "uri requierd"
           }`,
         },
       },
       400
     );
   } else {
+    console.log(uri,duration)
     const group:string[] = searchURL(uri);
     const idconstractor:string|undefined=btoa(group[2]).split("").reverse().join("").replace(/\=*/gi,'')
     const val = {
@@ -71,6 +72,7 @@ app.all("/api", async (c) => {
     } else {
       await redis.setex(val.id, duration, val.site);
       return c.json({ url: `${Deno.env.get("HOST") + val.id}` });
+      
     }
   }
 });
