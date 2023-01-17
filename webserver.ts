@@ -43,11 +43,11 @@ app.use(
 app.all("/api", async (c) => {
   let uri:string = c.req.queries("url")[0];
   let duration:number = c.req.queries("dur")[0];
-  if (!Number(duration) || duration <= 0 || uri.length === 0 || uri.startsWith('"')) {
+  if (!Number(duration) || duration <= 0 || uri.length === 0 || uri.startsWith('"') || !uri.matchAll(/https:\/\/?/gi)) {
     return c.json(
       {
         queries: {
-          errors: `${uri.startsWith('"') ? "invalid URL" : 
+          errors: `${uri.startsWith('"') || !uri.matchAll(/https:\/\/?/gi) ? "invalid URL" : 
             duration<=0 || !Number(duration) ? "duration requierd " : "uri requierd"
           }`,
         },
@@ -55,7 +55,6 @@ app.all("/api", async (c) => {
       400
     );
   } else {
-    console.log(uri,duration)
     const group:string[] = searchURL(uri);
     const idconstractor:string|undefined=btoa(group[2]).split("").reverse().join("").replace(/\=*/gi,'')
     const val = {
