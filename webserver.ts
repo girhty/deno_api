@@ -26,13 +26,14 @@ function searchURL(input: string) {
     return m;
   }
 }
-const url = Deno.env.get("URL");
-const redis = await connect(parseURL(url));
+const db_url = Deno.env.get("DB_URL");
+const redis = await connect(parseURL(db_url));
 const app = new Hono();
+const cors_origin:string=Deno.env.get("cors_origin")
 app.use(
   "/api",
   cors({
-    origin: "https://smrf.cc",
+    origin: cors_origin,
     allowHeaders: ["X-Custom-Header", "Upgrade-Insecure-Requests"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
@@ -67,10 +68,10 @@ app.all("/api", async (c) => {
     };
     const check: string = await redis.get(val.id);
     if (check) {
-      return c.json({ url: `${Deno.env.get("HOST") + val.id}` });
+      return c.json({ url: `${Deno.env.get("SELF") + val.id}` });
     } else {
       await redis.setex(val.id, duration, val.site);
-      return c.json({ url: `${Deno.env.get("HOST") + val.id}` });
+      return c.json({ url: `${Deno.env.get("SELF") + val.id}` });
       
     }
   }
