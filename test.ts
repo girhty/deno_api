@@ -23,7 +23,7 @@ function toBinary(input:string):string {
     return result;
   }
 
-  const url:string[] =searchURL("https://www.twitch.org")
-const id=btoa(url[1])
+  const url:string[] =searchURL("https://www.twitch.com")
+const id=btoa(url[1]).split("").reverse().join("").substring(0, 6)
 console.log(id,url)
 console.log(id.split("").reverse().join("").replace(/\=*/gm,''))

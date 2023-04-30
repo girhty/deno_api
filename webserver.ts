@@ -62,7 +62,7 @@ app.all("/api", async (c) => {
       id: `${
         group[2] !== undefined && group[2]!=="/"
           ? `${group[2].length>15 ? idconstractor.substring(Math.floor(idconstractor.length/2),Math.floor(idconstractor.length/2)+6): idconstractor.substring(0,6)}`
-          : btoa(group[1].replace(/\=*/gi,'')).split().reverse().join("").substring(0, 6)
+          : btoa(group[1].replace(/\=*/gi,'')).split("").reverse().join("").substring(0, 6)
       }`,
       site: `${group[2] ? btoa(group[1] + group[2]) : btoa(group[1])}`,
     };
