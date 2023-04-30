@@ -60,7 +60,7 @@ app.all("/api", async (c) => {
     const idconstractor:string|undefined=btoa(group[2]).split("").reverse().join("").replace(/\=*/gi,'')
     const val = {
       id: `${
-        group[2] && group[2]!=="/"
+        group[2] !== undefined && group[2]!=="/"
           ? `${group[2].length>15 ? idconstractor.substring(Math.floor(idconstractor.length/2),Math.floor(idconstractor.length/2)+6): idconstractor.substring(0,6)}`
           : btoa(group[1].replace(/\=*/gi,'')).substring(0, 6)
       }`,

@@ -9,8 +9,21 @@ function searchURL(input: string) {
         return m;
   }}
 
-  const url:string[]=searchURL("https://www.twitch.tv/togglebit")
-const id=btoa(url[2])
-console.log(id)
-console.log(id.split("").reverse().join("").replace(/\=*/gm,''))
+function toBinary(input:string):string {
+    const codeUnits = Uint16Array.from(
+      { length: input.length },
+      (element, index) => input.charCodeAt(index)
+    );
+    const charCodes = new Uint8Array(codeUnits.buffer);
   
+    let result = "";
+    charCodes.forEach((char) => {
+      result += String.fromCharCode(char);
+    });
+    return result;
+  }
+
+  const url:string[] =searchURL("https://www.twitch.org")
+const id=btoa(url[1])
+console.log(id,url)
+console.log(id.split("").reverse().join("").replace(/\=*/gm,''))
